@@ -19,12 +19,9 @@ pipeline {
         stage('Get Version') {
             steps {
                 script {
-                    // def gitVersionOutput = sh(script: "dotnet-gitversion", returnStdout: true).trim()
-                    // VERSION = sh(script: "echo '${gitVersionOutput}' | jq -r .NuGetVersionV2", returnStdout: true).trim()
-                    sh '''
-                        export PATH="$PATH:/var/lib/jenkins/.dotnet/tools"
-                        dotnet-gitversion
-                        '''
+                    sh "export PATH="$PATH:/var/lib/jenkins/.dotnet/tools""
+                    def gitVersionOutput = sh(script: "dotnet-gitversion", returnStdout: true).trim()
+                    VERSION = sh(script: "echo '${gitVersionOutput}' | jq -r .NuGetVersionV2", returnStdout: true).trim()
                 }
             }
         }
