@@ -30,6 +30,12 @@ pipeline {
             }
         }
 
+        stage('SM test') {
+            steps {
+                sh "aws secretsmanager get-secret-value --secret-id CodeBuild/github/token"
+            }
+        }
+
 
         stage('Build Docker Image') {
             steps {
@@ -39,13 +45,6 @@ pipeline {
                 sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO}:${VERSION}"
             }
         }
-
-        stage('SM test') {
-            steps {
-                sh "aws secretsmanager get-secret-value --secret-id CodeBuild/github/token"
-            }
-        }
-
 
         // stage('.NET Build and Test') {
         //     steps {
