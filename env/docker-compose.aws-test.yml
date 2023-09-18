@@ -1,0 +1,17 @@
+version: '3'
+
+# aws integration test docker compose
+
+services:
+  
+  zookeeper:
+    image: 212845026981.dkr.ecr.eu-central-1.amazonaws.com/bitnami/zookeeper:${ZOOKEEPER_VERSION}
+  
+  kafka:
+    image: 212845026981.dkr.ecr.eu-central-1.amazonaws.com/bitnami/kafka:${KAFKA_VERSION}
+  
+  mysql:
+    image: 212845026981.dkr.ecr.eu-central-1.amazonaws.com/mysql:${MYSQL_VERSION}
+  
+  debezium:
+    image: 212845026981.dkr.ecr.eu-central-1.amazonaws.com/debezium/connect:${DEBEZIUM_VERSION}

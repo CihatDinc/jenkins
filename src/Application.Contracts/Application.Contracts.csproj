@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyVersion>0.1.0</AssemblyVersion>
+    <PackageVersion>0.1.0</PackageVersion>
+    <Title>Nebim.Era.Plt.Comm.Customer.Application.Contracts</Title>
+    <Description>Nebim Era Customer Service Application Contracts</Description>
+    <Copyright>Nebim</Copyright>
+    <PackageProjectUrl>https://github.com/nebim-era/nebim.era.plt.comm.customer</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/nebim-era/nebim.era.plt.comm.customer</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <Authors>Nebim Developers</Authors>
+    <Company>Nebim Neyir Bilgisayar Sanayii ve Hizmetleri A.Ş.</Company>
+    <AssemblyName>Nebim.Era.Plt.Comm.Customer.Application.Contracts</AssemblyName>
+    <RootNamespace>Nebim.Era.Plt.Comm.Customer.Application.Contracts</RootNamespace>
+    <LangVersion>11</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EmptyConstructor.Fody" Version="3.0.3" PrivateAssets="All" />
+    <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" />
+    <PackageReference Include="MediatR.Contracts" Version="2.0.1" />
+    <PackageReference Include="Nebim.Era.Plt.Core" Version="0.9.5" />
+    <PackageReference Include="nebim.era.plt.data" Version="0.3.8" />
+  </ItemGroup>
+
+</Project>

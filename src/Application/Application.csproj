@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="FluentValidation" Version="11.6.0" />
+        <PackageReference Include="MediatR" Version="12.1.1" />
+        <PackageReference Include="Nebim.Era.Plt.Core" Version="0.9.5" />
+        <PackageReference Include="Nebim.Era.Plt.Core.Validators" Version="0.9.5" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />
+        <ProjectReference Include="..\Domain\Domain.csproj" />
+        <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+    </ItemGroup>
+
+</Project>
