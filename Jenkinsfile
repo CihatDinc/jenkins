@@ -13,6 +13,7 @@ pipeline {
         ECR_REPO = 'nebim-era-plt-comm-customer-dev'
         S3_BUCKET = 'nebim-era-plt-deployment-yamls/nebim-era-plt-comm-customer-deployment-yaml/nebim-era-plt-comm-customer-deployment.yaml'
         SERVICE_NAME = 'your-service-name'
+        GITHUB = credentials('CodeBuild/github/token')
     }
 
     stages {
@@ -38,6 +39,12 @@ pipeline {
                 sh "docker tag ${ECR_REPO}:${VERSION} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO}:${VERSION}"
                 sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
                 sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO}:${VERSION}"
+            }
+        }
+
+        stage('SM test') {
+            steps {
+                sh "aws secretsmanager get-secret-value --secret-id CodeBuild/github/token"
             }
         }
 
