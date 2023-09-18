@@ -25,7 +25,7 @@ pipeline {
                     echo "Git Version Output: $gitVersionOutput"
                     VERSION=$(echo $gitVersionOutput | jq -r .NuGetVersionV2)
                     echo $VERSION
-                    export $VERSION
+                    export VERSION
                     '''
                     //VERSION = sh(script: "echo '${gitVersionOutput}' | jq -r .NuGetVersionV2", returnStdout: true).trim()
                 }
