@@ -9,11 +9,9 @@ pipeline {
         AWS_CLUSTER_NAME = "era-eks-dev3"
         KUBE_CONFIG = "/root/.kube/config"
         SERVICE_ACCOUNT_NAME = "era-plt-service-account"
-
         ECR_REPO = 'nebim-era-plt-comm-customer-dev'
         S3_BUCKET = 'nebim-era-plt-deployment-yamls/nebim-era-plt-comm-customer-deployment-yaml/nebim-era-plt-comm-customer-deployment.yaml'
         SERVICE_NAME = 'your-service-name'
-        GITHUB = credentials('CodeBuild/github/token')
     }
 
     stages {
