@@ -26,6 +26,7 @@ pipeline {
                         echo $PATH
                         export PATH="$PATH:/root/.dotnet/tools"
                         echo $PATH
+                        chmod +x /root/.dotnet/tools/dotnet-gitversion
                         dotnet-gitversion
                         '''
                 }
