@@ -23,8 +23,10 @@ pipeline {
                     export PATH="$PATH:/var/lib/jenkins/.dotnet/tools"
                     gitVersionOutput=$(dotnet-gitversion)
                     echo "Git Version Output: $gitVersionOutput"
+                    VERSION=$(echo $GitVersion | grep -oP '(?<="NuGetVersionV2":\s")[^"]*')
+                    echo $VERSION
                     '''
-                    VERSION = sh(script: "echo '${gitVersionOutput}' | jq -r .NuGetVersionV2", returnStdout: true).trim()
+                    //VERSION = sh(script: "echo '${gitVersionOutput}' | jq -r .NuGetVersionV2", returnStdout: true).trim()
                 }
             }
         }
