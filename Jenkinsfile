@@ -25,6 +25,7 @@ pipeline {
                         echo $PATH
                         export PATH="$PATH:/root/.dotnet/tools"
                         echo $PATH
+                        ps aux | grep jenkins
                         dotnet-gitversion
                         '''
                 }
