@@ -16,12 +16,6 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/nebim-era/nebim.era.plt.comm.customer.git']])
-            }
-        }
-
         stage('Get Version') {
             steps {
                 script {
