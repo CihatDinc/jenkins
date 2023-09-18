@@ -22,9 +22,11 @@ pipeline {
                     sh '''
                     export PATH="$PATH:/var/lib/jenkins/.dotnet/tools"
                     gitVersionOutput=$(dotnet-gitversion)
+                    VERSION=$(echo $gitVersionOutput | jq -r .NuGetVersionV2)
+                    echo "VERSION=$VERSION" > version.properties
                     '''
-                    def gitVersionOutput = sh(script: 'echo $gitVersionOutput', returnStdout: true).trim()
-                    env.VERSION = sh(script: "echo '${gitVersionOutput}' | jq -r .NuGetVersionV2", returnStdout: true).trim()
+                    def props = readProperties file: 'version.properties'
+                    env.VERSION = props.VERSION
                 }
             }
         }
