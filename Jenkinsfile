@@ -22,10 +22,6 @@ pipeline {
                     // def gitVersionOutput = sh(script: "dotnet-gitversion", returnStdout: true).trim()
                     // VERSION = sh(script: "echo '${gitVersionOutput}' | jq -r .NuGetVersionV2", returnStdout: true).trim()
                     sh '''
-                        // dotnet tool install --global GitVersion.Tool --version 5.*
-                        // echo $PATH
-                        // export PATH="$PATH:/root/.dotnet/tools"
-                        // echo $PATH
                         chmod +x /root/.dotnet/tools/dotnet-gitversion
                         dotnet-gitversion
                         '''
