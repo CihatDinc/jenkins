@@ -15,11 +15,21 @@ pipeline {
         }
 
         stages {
+            stage('Setup Environment Variables') {
+                steps {
+                    script {
+                        def secretMap = readJSON text: MY_SECRET
+                        env.GITHUB_USERNAME = secretMap.USERNAME
+                        env.GITHUB_ACCESS_TOKEN = secretMap.TOKEN
+                        env.GITHUB_PACKAGE_URL = secretMap.URL
+        }
+    }
+}
+
        
             stage('Logging into AWS ECR') {
                 steps {
                     script {
-                        echo "My Secret: ${MY_SECRET}"
                         sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
                     }       
                 }
@@ -31,40 +41,32 @@ pipeline {
                 }
             }
        
-        // Building Docker images
+            // Building Docker images
+            stage('Building image') {
+                steps{
+                    script {
+                        sh "docker build --build-arg GITHUB_USERNAME --build-arg GITHUB_ACCESS_TOKEN --build-arg GITHUB_PACKAGE_URL -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG} ."
+                    }
+                }    
+            }
+
             // stage('Building image') {
-            //     steps{
-            //         script {
-            //             withCredentials([string(credentialsId: 'CodeBuild/github/token', variable: 'secret')]){
-            //                 script{
-            //                     def creds = readJSON text: secret
-            //                     env.GITHUB_USERNAME = creds['USERNAME']
-            //                     env.GITHUB_ACCESS_TOKEN = creds['TOKEN']
-            //                     env.GITHUB_PACKAGE_URL = creds['URL']
+            //     steps {
+            //         withCredentials([string(credentialsId: 'CodeBuild/github/token', variable: 'SECRETS')]) {
+            //             script {
+            //                 def creds = readJSON text: SECRETS
+                            
+            //                 withEnv([
+            //                     "MASKED_GITHUB_USERNAME=${creds['USERNAME']}",
+            //                     "MASKED_GITHUB_ACCESS_TOKEN=${creds['TOKEN']}",
+            //                     "MASKED_GITHUB_PACKAGE_URL=${creds['URL']}"
+            //                 ]) {
+            //                     sh "docker build --build-arg GITHUB_USERNAME=$MASKED_GITHUB_USERNAME --build-arg GITHUB_ACCESS_TOKEN=$MASKED_GITHUB_ACCESS_TOKEN --build-arg GITHUB_PACKAGE_URL=$MASKED_GITHUB_PACKAGE_URL -t ${REPOSITORY_URI}:${IMAGE_TAG} ."
             //                 }
             //             }
-            //             sh "docker build --build-arg GITHUB_USERNAME=${GITHUB_USERNAME} --build-arg GITHUB_ACCESS_TOKEN=${GITHUB_ACCESS_TOKEN} --build-arg GITHUB_PACKAGE_URL=${GITHUB_PACKAGE_URL} -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG} ."
             //         }
-            //     }    
-            // }
-
-            stage('Building image') {
-                steps {
-                    withCredentials([string(credentialsId: 'CodeBuild/github/token', variable: 'SECRETS')]) {
-                        script {
-                            def creds = readJSON text: SECRETS
-                            
-                            withEnv([
-                                "MASKED_GITHUB_USERNAME=${creds['USERNAME']}",
-                                "MASKED_GITHUB_ACCESS_TOKEN=${creds['TOKEN']}",
-                                "MASKED_GITHUB_PACKAGE_URL=${creds['URL']}"
-                            ]) {
-                                sh "docker build --build-arg GITHUB_USERNAME=$MASKED_GITHUB_USERNAME --build-arg GITHUB_ACCESS_TOKEN=$MASKED_GITHUB_ACCESS_TOKEN --build-arg GITHUB_PACKAGE_URL=$MASKED_GITHUB_PACKAGE_URL -t ${REPOSITORY_URI}:${IMAGE_TAG} ."
-                            }
-                        }
-                    }
-                }
-            } 
+            //     }
+            // } 
        
         // Uploading Docker images into AWS ECR
             stage('Pushing to ECR') {
