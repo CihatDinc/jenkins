@@ -51,7 +51,7 @@ pipeline {
             stage('Building image') {
                 steps{
                     script {
-                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'awsSecret', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
+                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'CodeBuild/github/token', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
                             script{
                                 def secrets = sh(script: "aws secretsmanager get-secret-value --secret-id CodeBuild/github/token --query SecretString --output text", returnStdout: true).trim()
                                 def creds = readJSON text: secrets
