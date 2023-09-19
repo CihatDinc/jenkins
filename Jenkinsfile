@@ -50,7 +50,7 @@ pipeline {
                 steps {
                     sh "aws s3 cp s3://${S3_BUCKET} ."
                     sh "cat nebim-era-plt-comm-customer-deployment.yaml"
-                    sh "sed -i 's/CONTAINER_IMAGE/${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}/g' nebim-era-plt-comm-customer-deployment.yaml"
+                    sh "sed -i 's|CONTAINER_IMAGE|${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}|g' nebim-era-plt-comm-customer-deployment.yaml"
                     sh "cat nebim-era-plt-comm-customer-deployment.yaml"
             }
         }
