@@ -1,86 +1,46 @@
 pipeline {
-    agent any 
+ agent any
+        environment {
+            AWS_ACCOUNT_ID="212845026981"
+            AWS_DEFAULT_REGION="eu-central-1" 
+            IMAGE_REPO_NAME="jenkins-test-customer"
+            IMAGE_TAG="latest"
+            REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+        }
 
-    environment {
-        AWS_DEFAULT_REGION = "eu-central-1"
-        AWS_ACCOUNT_ID = "212845026981"
-        STAGE = "plt"
-        NAMESPACE = "plt"
-        AWS_CLUSTER_NAME = "era-eks-dev3"
-        KUBE_CONFIG = "/root/.kube/config"
-        SERVICE_ACCOUNT_NAME = "era-plt-service-account"
-
-        ECR_REPO = 'nebim-era-plt-comm-customer-dev'
-        S3_BUCKET = 'nebim-era-plt-deployment-yamls/nebim-era-plt-comm-customer-deployment-yaml/nebim-era-plt-comm-customer-deployment.yaml'
-        SERVICE_NAME = 'your-service-name'
-    }
-
-    stages {
-        stage('Get Version') {
-            steps {
-                script {
-                    // def gitVersionOutput = sh(script: "dotnet-gitversion", returnStdout: true).trim()
-                    // VERSION = sh(script: "echo '${gitVersionOutput}' | jq -r .NuGetVersionV2", returnStdout: true).trim()
-                    sh "dotnet tool install --global GitVersion.Tool --version 5.*"
-                    sh "echo $PATH"
-                    sh "export PATH="$PATH:/root/.dotnet/tools""
-                    sh "echo $PATH"
-                    sh "dotnet-gitversion"
+        stages {
+       
+            stage('Logging into AWS ECR') {
+                steps {
+                    script {
+                        sh "aws ecr get-login-password - region ${AWS_DEFAULT_REGION} | docker login - username AWS - password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+                    }       
+                }
+            }
+       
+            stage('Cloning Git') {
+                steps {
+                    checkout([$class: 'GitSCM', branches: [[name: '*/main']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/CihatDinc/jenkins.git']]]) 
+                }
+            }
+       
+        // Building Docker images
+            stage('Building image') {
+                steps{
+                    script {
+                        dockerImage = docker.build "${IMAGE_REPO_NAME}:${IMAGE_TAG}"
+                    }
+                }
+            }
+       
+        // Uploading Docker images into AWS ECR
+            stage('Pushing to ECR') {
+                steps{ 
+                    script {
+                        sh "docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:$IMAGE_TAG"
+                        sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"
+                    }
                 }
             }
         }
-
-
-        stage('Build Docker Image') {
-            steps {
-                sh "docker build -t ${ECR_REPO}:${VERSION} ."
-                sh "docker tag ${ECR_REPO}:${VERSION} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO}:${VERSION}"
-                sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
-                sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO}:${VERSION}"
-            }
-        }
-
-
-        // stage('.NET Build and Test') {
-        //     steps {
-        //         sh "dotnet nuget add source"
-        //         sh "dotnet build"
-        //         sh "dotnet test"
-        //     }
-        // }
-
-        stage('Fetch and Modify deployment.yaml') {
-            steps {
-                sh "aws s3 cp s3://${S3_BUCKET} ."
-                sh "cat nebim-era-plt-comm-customer-deployment.yaml"
-                sh "sed -i 's/SERVICE_GIT_VERSION/${VERSION}/g' nebim-era-plt-comm-customer-deployment.yaml"
-                sh "cat nebim-era-plt-comm-customer-deployment.yaml"
-            }
-        }
-
-        // stage('Push NuGet Packages') {
-        //     steps {
-        //         sh "dotnet nuget push **/*.nupkg --source <YourNugetSource> --api-key <YourAPIKey>"
-        //     }
-        // }
-
-        // stage('Push Git Changes') {
-        //     steps {
-        //         sh "git tag ${VERSION}"
-        //         sh "git push origin ${VERSION}"
-        //     }
-        // }
-
-        // stage('Apply Kubernetes Deployment') {
-        //     steps {
-        //         sh "kubectl apply -f deployment.yaml"
-        //     }
-        // }
-
-        stage('Control Kubernetes Deployment') {
-            steps {
-                sh "kubectl describe deployments plt-comm-customer-deployment -n plt"
-            }
-        }        
-    }
 }
