@@ -58,7 +58,7 @@ pipeline {
                 }
             }
 
-            stage('Control K8s deployment') {
+            stage('K8S Deploy') {
                 steps {
                     sh "kubectl apply -f nebim-era-plt-comm-customer-deployment"
                 }
