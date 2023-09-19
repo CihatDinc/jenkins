@@ -12,6 +12,7 @@ pipeline {
         ECR_REPO = 'nebim-era-plt-comm-customer-dev'
         S3_BUCKET = 'nebim-era-plt-deployment-yamls/nebim-era-plt-comm-customer-deployment-yaml/nebim-era-plt-comm-customer-deployment.yaml'
         SERVICE_NAME = 'your-service-name'
+        MY_SECRET = credentials('CodeBuild/github/token')
     }
 
     stages {
@@ -29,10 +30,31 @@ pipeline {
                 }
             }
         }
-
+        stages {
+            stage('Example Stage') {
+                steps {
+                    script {
+                        echo "My Secret: ${MY_SECRET}"
+                    }
+                }
+            }
+        }
+    
         stage('SM test') {
             steps {
-                sh "aws secretsmanager get-secret-value --secret-id CodeBuild/github/token"
+                sh '''
+                secretsValue=$(echo aws secretsmanager get-secret-value --secret-id CodeBuild/github/token)
+                username=$(echo $secretsValue | jq -r .USERNAME)
+                url=$(echo $secretsValue | jq -r .URL)
+                token=$(echo $secretsValue | jq -r .TOKEN)
+                echo "username=$username" > secrets.properties
+                echo "url=$url" >> secrets.properties
+                echo "token=$token" >> secrets.properties
+                '''
+                def props = readProperties file: 'secrets.properties'
+                env.username = props.username
+                env.url = props.url
+                env.token = props.token
             }
         }
 
