@@ -6,6 +6,9 @@ pipeline {
             IMAGE_REPO_NAME="jenkins-test-customer"
             IMAGE_TAG="latest"
             REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+            GITHUB_USERNAME="nebim-github-user"
+            GITHUB_ACCESS_TOKEN="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"
+            GITHUB_PACKAGE_URL="https://nuget.pkg.github.com/nebim-era/index.json"
         }
 
         stages {
@@ -20,7 +23,7 @@ pipeline {
        
             stage('Cloning Git') {
                 steps {
-                    checkout scmGit(branches: [[name: '*/main']], extensions: [[$class: 'WipeWorkspace']], userRemoteConfigs: [[credentialsId: 'GithubConnection', url: 'https://github.com/CihatDinc/jenkins.git']])
+                    checkout([$class: 'GitSCM', branches: [[name: '*/main']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/CihatDinc/jenkins.git']]]) 
                 }
             }
        
@@ -28,7 +31,7 @@ pipeline {
             stage('Building image') {
                 steps{
                     script {
-                        dockerImage = docker.build "${IMAGE_REPO_NAME}:${IMAGE_TAG}"
+                        sh "docker build --build-arg GITHUB_USERNAME=${GITHUB_USERNAME} --build-arg GITHUB_ACCESS_TOKEN=${GITHUB_ACCESS_TOKEN} --build-arg GITHUB_PACKAGE_URL=${GITHUB_PACKAGE_URL} -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG} ."
                     }
                 }
             }
@@ -37,7 +40,6 @@ pipeline {
             stage('Pushing to ECR') {
                 steps{ 
                     script {
-                        sh "docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:$IMAGE_TAG"
                         sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"
                     }
                 }
