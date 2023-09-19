@@ -9,6 +9,7 @@ pipeline {
             GITHUB_USERNAME="nebim-github-user"
             GITHUB_ACCESS_TOKEN="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"
             GITHUB_PACKAGE_URL="https://nuget.pkg.github.com/nebim-era/index.json"
+            S3_BUCKET="nebim-era-plt-deployment-yamls/nebim-era-plt-comm-customer-deployment-yaml/nebim-era-plt-comm-customer-deployment.yaml"
         }
 
         stages {
@@ -44,5 +45,15 @@ pipeline {
                     }
                 }
             }
+                    
+            stage('Fetch and Modify deployment.yaml') {
+                steps {
+                    sh "aws s3 cp s3://${S3_BUCKET} ."
+                    sh "cat nebim-era-plt-comm-customer-deployment.yaml"
+                    sh "sed -i 's/CONTAINER_IMAGE/${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}/g' nebim-era-plt-comm-customer-deployment.yaml"
+                    sh "cat nebim-era-plt-comm-customer-deployment.yaml"
+            }
         }
+        }
+
 }
