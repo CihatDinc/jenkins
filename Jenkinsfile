@@ -60,7 +60,7 @@ pipeline {
 
             stage('Control K8s deployment') {
                 steps {
-                    sh "kubectl describe deployment plt-comm-customer-deployment -n plt"
+                    sh "kubectl apply -f nebim-era-plt-comm-customer-deployment"
                 }
             }            
         }
