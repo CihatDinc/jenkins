@@ -6,12 +6,11 @@ pipeline {
             IMAGE_REPO_NAME="jenkins-test-customer"
             IMAGE_TAG="latest"
             REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
-            GITHUB_USERNAME="nebim-github-user"
-            GITHUB_ACCESS_TOKEN="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"
-            GITHUB_PACKAGE_URL="https://nuget.pkg.github.com/nebim-era/index.json"
+            // GITHUB_USERNAME="nebim-github-user"
+            // GITHUB_ACCESS_TOKEN="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"
+            // GITHUB_PACKAGE_URL="https://nuget.pkg.github.com/nebim-era/index.json"
             S3_BUCKET="nebim-era-plt-deployment-yamls/nebim-era-plt-comm-customer-deployment-yaml/nebim-era-plt-comm-customer-deployment.yaml"
             SERVICE_ACCOUNT_NAME="era-plt-service-account"
-            TEST_SECRET_VALUE = credentials('newrelic-api-key')
         }
 
         stages {
@@ -20,7 +19,6 @@ pipeline {
                 steps {
                     script {
                         sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
-                        sh "echo ${TEST_SECRET_VALUE} > newrelic-api-key.txt"
                     }       
                 }
             }
@@ -35,6 +33,14 @@ pipeline {
             stage('Building image') {
                 steps{
                     script {
+                        withCredentials([string(credentialsId: 'CodeBuild/github/token', variable: 'secret')]){
+                            script{
+                                def creds = readJSON text: secret
+                                env.GITHUB_USERNAME = creds['USERNAME']
+                                env.GITHUB_ACCESS_TOKEN = creds['TOKEN']
+                                env.GITHUB_PACKAGE_URL = creds['URL']
+                            }
+                        }
                         sh "docker build --build-arg GITHUB_USERNAME=${GITHUB_USERNAME} --build-arg GITHUB_ACCESS_TOKEN=${GITHUB_ACCESS_TOKEN} --build-arg GITHUB_PACKAGE_URL=${GITHUB_PACKAGE_URL} -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG} ."
                     }
                 }
@@ -62,7 +68,8 @@ pipeline {
 
             stage('K8S Deploy') {
                 steps {
-                    sh "kubectl apply -f nebim-era-plt-comm-customer-deployment.yaml"
+                    // sh "kubectl apply -f nebim-era-plt-comm-customer-deployment.yaml"
+                    sh "kubectl describe deployments plt-comm-customer-deployment -n plt"
                 }
             }            
         }
