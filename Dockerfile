@@ -23,11 +23,13 @@ ENV GITHUB_PACKAGE_URL=$GITHUB_PACKAGE_URL
 
 WORKDIR /src
 COPY . .
-RUN dotnet nuget add source \
-    --username $GITHUB_USERNAME \
-    --password $GITHUB_ACCESS_TOKEN \
-    --store-password-in-clear-text \
-    --name github $GITHUB_PACKAGE_URL
+
+
+COPY add_nuget_source.sh /src/
+RUN chmod +x /src/add_nuget_source.sh
+RUN /src/add_nuget_source.sh
+
+
 RUN dotnet restore "src/Service/Service.csproj"
 WORKDIR "/src/src/Service"
 RUN dotnet build "Service.csproj" -c Release -o /app/build
