@@ -32,21 +32,35 @@ pipeline {
             }
        
         // Building Docker images
+            // stage('Building image') {
+            //     steps{
+            //         script {
+            //             withCredentials([string(credentialsId: 'CodeBuild/github/token', variable: 'secret')]){
+            //                 script{
+            //                     def creds = readJSON text: secret
+            //                     env.GITHUB_USERNAME = creds['USERNAME']
+            //                     env.GITHUB_ACCESS_TOKEN = creds['TOKEN']
+            //                     env.GITHUB_PACKAGE_URL = creds['URL']
+            //                 }
+            //             }
+            //             sh "docker build --build-arg GITHUB_USERNAME=${GITHUB_USERNAME} --build-arg GITHUB_ACCESS_TOKEN=${GITHUB_ACCESS_TOKEN} --build-arg GITHUB_PACKAGE_URL=${GITHUB_PACKAGE_URL} -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG} ."
+            //         }
+            //     }
+            // }
+
             stage('Building image') {
                 steps{
                     script {
-                        withCredentials([string(credentialsId: 'CodeBuild/github/token', variable: 'secret')]){
+                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'awsSecret', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY']]) {
                             script{
-                                def creds = readJSON text: secret
-                                env.GITHUB_USERNAME = creds['USERNAME']
-                                env.GITHUB_ACCESS_TOKEN = creds['TOKEN']
-                                env.GITHUB_PACKAGE_URL = creds['URL']
+                                def secrets = sh(script: "aws secretsmanager get-secret-value --secret-id CodeBuild/github/token --query SecretString --output text", returnStdout: true).trim()
+                                def creds = readJSON text: secrets
+                                sh "docker build --build-arg GITHUB_USERNAME=${creds['USERNAME']} --build-arg GITHUB_ACCESS_TOKEN=${creds['TOKEN']} --build-arg GITHUB_PACKAGE_URL=${creds['URL']} -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG} ."
                             }
-                        }
-                        sh "docker build --build-arg GITHUB_USERNAME=${GITHUB_USERNAME} --build-arg GITHUB_ACCESS_TOKEN=${GITHUB_ACCESS_TOKEN} --build-arg GITHUB_PACKAGE_URL=${GITHUB_PACKAGE_URL} -t ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG} ."
+                        }                    
                     }
                 }
-            }
+            }            
        
         // Uploading Docker images into AWS ECR
             stage('Pushing to ECR') {
