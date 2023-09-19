@@ -11,7 +11,7 @@ pipeline {
             // GITHUB_PACKAGE_URL="https://nuget.pkg.github.com/nebim-era/index.json"
             S3_BUCKET="nebim-era-plt-deployment-yamls/nebim-era-plt-comm-customer-deployment-yaml/nebim-era-plt-comm-customer-deployment.yaml"
             SERVICE_ACCOUNT_NAME="era-plt-service-account"
-            MY_SECRET = credentials('newrelic-api-key2')
+            MY_SECRET = credentials('CodeBuild/github/token')
         }
 
         stages {
