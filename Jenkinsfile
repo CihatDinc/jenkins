@@ -20,7 +20,7 @@ pipeline {
        
             stage('Cloning Git') {
                 steps {
-                    checkout([$class: 'GitSCM', branches: [[name: '*/main']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '', url: 'https://github.com/CihatDinc/jenkins.git']]]) 
+                    checkout scmGit(branches: [[name: '*/main']], extensions: [[$class: 'WipeWorkspace']], userRemoteConfigs: [[credentialsId: 'GithubConnection', url: 'https://github.com/CihatDinc/jenkins.git']])
                 }
             }
        
