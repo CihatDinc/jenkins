@@ -53,12 +53,15 @@ pipeline {
                         withCredentials([string(credentialsId: 'CodeBuild/github/token', variable: 'SECRETS')]) {
                             script {
                                 def creds = readJSON text: SECRETS
+                                def GITHUB_USERNAME = creds['USERNAME']
+                                def GITHUB_ACCESS_TOKEN = creds['TOKEN']
+                                def GITHUB_PACKAGE_URL = creds['URL']
+
                                 // Gizli değerleri maskeleyelim
                                 maskPasswords(
-                                    passwords: [[$class: 'PasswordParameterValue', name: 'GITHUB_USERNAME', password: creds['USERNAME']],
-                                                [$class: 'PasswordParameterValue', name: 'GITHUB_ACCESS_TOKEN', password: creds['TOKEN']],
-                                                [$class: 'PasswordParameterValue', name: 'GITHUB_PACKAGE_URL', password: creds['URL']]],
-                                    varName: 'maskedVars'
+                                    passwords: [[$class: 'PasswordParameterValue', name: 'MASKED_GITHUB_USERNAME', password: GITHUB_USERNAME],
+                                                [$class: 'PasswordParameterValue', name: 'MASKED_GITHUB_ACCESS_TOKEN', password: GITHUB_ACCESS_TOKEN],
+                                                [$class: 'PasswordParameterValue', name: 'MASKED_GITHUB_PACKAGE_URL', password: GITHUB_PACKAGE_URL]]
                                 ) {
                                     sh "docker build --build-arg GITHUB_USERNAME=$GITHUB_USERNAME --build-arg GITHUB_ACCESS_TOKEN=$GITHUB_ACCESS_TOKEN --build-arg GITHUB_PACKAGE_URL=$GITHUB_PACKAGE_URL -t ${REPOSITORY_URI}:${IMAGE_TAG} ."
                                 }
