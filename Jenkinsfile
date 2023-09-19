@@ -11,6 +11,7 @@ pipeline {
             GITHUB_PACKAGE_URL="https://nuget.pkg.github.com/nebim-era/index.json"
             S3_BUCKET="nebim-era-plt-deployment-yamls/nebim-era-plt-comm-customer-deployment-yaml/nebim-era-plt-comm-customer-deployment.yaml"
             SERVICE_ACCOUNT_NAME="era-plt-service-account"
+            TEST_SECRET_VALUE = credentials('newrelic-api-key')
         }
 
         stages {
@@ -19,6 +20,7 @@ pipeline {
                 steps {
                     script {
                         sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+                        sh "echo ${TEST_SECRET_VALUE} > newrelic-api-key.txt"
                     }       
                 }
             }
