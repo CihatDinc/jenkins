@@ -24,7 +24,7 @@ pipeline {
                         '''
                         def props = readProperties file: 'version.properties'
                         env.VERSION = props.VERSION
-                        env.VERSIONTAG = "0.0.${BUILD_NUMBER}-${GIT_PREVIOUS_COMMIT}-${VERSIONTAG}"
+                        env.VERSIONTAG = "0.0.${BUILD_NUMBER}-${GIT_PREVIOUS_COMMIT}-${VERSION}"
                     }
                 }
             }
