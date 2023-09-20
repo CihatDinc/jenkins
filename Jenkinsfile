@@ -24,6 +24,7 @@ pipeline {
                         '''
                         def props = readProperties file: 'version.properties'
                         env.VERSION = props.VERSION
+                        env.VERSIONTAG = "0.0.${BUILD_NUMBER}-${GIT_PREVIOUS_COMMIT}-${VERSIONTAG}"
                     }
                 }
             }
@@ -33,7 +34,7 @@ pipeline {
                     script {
                         withCredentials([string(credentialsId: 'CodeBuild/github/token', variable: 'GITHUB_INFO')]) {
                             def secretMap = readJSON text: GITHUB_INFO
-                            sh "docker build --build-arg GITHUB_USERNAME=${secretMap.USERNAME} --build-arg GITHUB_ACCESS_TOKEN=${GITHUB_ACCESS_TOKEN} --build-arg GITHUB_PACKAGE_URL=${secretMap.URL} -t ${REPOSITORY_URI}:${VERSION} ."
+                            sh "docker build --build-arg GITHUB_USERNAME=${secretMap.USERNAME} --build-arg GITHUB_ACCESS_TOKEN=${GITHUB_ACCESS_TOKEN} --build-arg GITHUB_PACKAGE_URL=${secretMap.URL} -t ${REPOSITORY_URI}:${VERSIONTAG} ."
                         }
                     }
                 }
@@ -52,7 +53,7 @@ pipeline {
             stage('Pushing to ECR') {
                 steps{ 
                     script {
-                        sh "docker push ${REPOSITORY_URI}:${VERSION}"
+                        sh "docker push ${REPOSITORY_URI}:${VERSIONTAG}"
                     }
                 }
             }
@@ -62,7 +63,7 @@ pipeline {
                 steps {
                     sh "aws s3 cp s3://${S3_BUCKET} ."
                     sh "cat nebim-era-plt-comm-customer-deployment.yaml"
-                    sh "sed -i 's|CONTAINER_IMAGE|${REPOSITORY_URI}:${VERSION}|g' nebim-era-plt-comm-customer-deployment.yaml"
+                    sh "sed -i 's|CONTAINER_IMAGE|${REPOSITORY_URI}:${VERSIONTAG}|g' nebim-era-plt-comm-customer-deployment.yaml"
                     sh "sed -i 's|SERVICE_ACCOUNT_NAME|${SERVICE_ACCOUNT_NAME}|g' nebim-era-plt-comm-customer-deployment.yaml"
                     sh "cat nebim-era-plt-comm-customer-deployment.yaml"
                 }
