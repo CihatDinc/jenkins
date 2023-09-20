@@ -30,8 +30,6 @@ RUN dotnet nuget add source \
     --store-password-in-clear-text \
     --name github $GITHUB_PACKAGE_URL
 
-
-
 RUN dotnet restore "src/Service/Service.csproj"
 WORKDIR "/src/src/Service"
 RUN dotnet build "Service.csproj" -c Release -o /app/build

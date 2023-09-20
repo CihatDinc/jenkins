@@ -7,7 +7,9 @@ pipeline {
             REPOSITORY_URI      = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
             S3_BUCKET           ="nebim-era-plt-deployment-yamls/nebim-era-plt-comm-customer-deployment-yaml/nebim-era-plt-comm-customer-deployment.yaml"
             SERVICE_ACCOUNT_NAME="era-plt-service-account"
-            // GITHUB_SECRET       =credentials('CodeBuild/github/token')
+            GITHUB_SECRET       =credentials('Github_Token_V1')
+            GITHUB_USERNAME     ="nebim-github-user"
+            GITHUB_PACKAGE_URL  ="https://nuget.pkg.github.com/nebim-era/index.json"
         }
 
         stages {
@@ -49,19 +51,19 @@ pipeline {
             //         }
             //     }
             // }
-            stage('Building image') {
-                steps {
-                    script {
-                        withCredentials([string(credentialsId: 'Github_Token', variable: 'GITHUB_SECRET_JSON')]) {
-                            def secretMap = readJSON text: GITHUB_SECRET_JSON
-                            sh """
-                                chmod +x docker_build.sh
-                                ./docker_build.sh "${secretMap.USERNAME}" "${secretMap.TOKEN}" "${secretMap.URL}" "${REPOSITORY_URI}" "${VERSION}"
-                            """.trim()
-                        }
-                    }
-                }
-            }
+            // stage('Building image') {
+            //     steps {
+            //         script {
+            //             withCredentials([string(credentialsId: 'Github_Token', variable: 'GITHUB_SECRET_JSON')]) {
+            //                 def secretMap = readJSON text: GITHUB_SECRET_JSON
+            //                 sh """
+            //                     chmod +x docker_build.sh
+            //                     ./docker_build.sh "${secretMap.USERNAME}" "${secretMap.TOKEN}" "${secretMap.URL}" "${REPOSITORY_URI}" "${VERSION}"
+            //                 """.trim()
+            //             }
+            //         }
+            //     }
+            // }
 
 
             // Logging into AWS ECR
@@ -82,13 +84,13 @@ pipeline {
             }
        
             // Building Docker images
-            // stage('Building image') {
-            //     steps{
-            //         script {
-            //             sh "docker build --build-arg GITHUB_USERNAME --build-arg GITHUB_ACCESS_TOKEN --build-arg GITHUB_PACKAGE_URL -t ${REPOSITORY_URI}:${VERSION} ."
-            //         }
-            //     }    
-            // }
+            stage('Building image') {
+                steps{
+                    script {
+                        sh "docker build --build-arg GITHUB_USERNAME --build-arg GITHUB_SECRET --build-arg GITHUB_PACKAGE_URL -t ${REPOSITORY_URI}:${VERSION} ."
+                    }
+                }    
+            }
        
             // Uploading Docker images into AWS ECR
             stage('Pushing to ECR') {
