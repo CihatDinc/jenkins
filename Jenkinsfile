@@ -54,10 +54,10 @@ pipeline {
                     script {
                         withCredentials([string(credentialsId: 'Github_Token', variable: 'GITHUB_SECRET_JSON')]) {
                             def secretMap = readJSON text: GITHUB_SECRET_JSON
-                            sh '''
+                            sh """
                                 chmod +x docker_build.sh
-                                ./docker_build.sh "${GITHUB_USERNAME}" "${GITHUB_ACCESS_TOKEN}" "${GITHUB_PACKAGE_URL}" "${REPOSITORY_URI}" "${VERSION}"
-                            '''.trim()
+                                ./docker_build.sh "${secretMap.USERNAME}" "${secretMap.TOKEN}" "${secretMap.URL}" "${REPOSITORY_URI}" "${VERSION}"
+                            """.trim()
                         }
                     }
                 }
