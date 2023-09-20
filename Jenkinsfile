@@ -7,7 +7,7 @@ pipeline {
             REPOSITORY_URI      = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
             S3_BUCKET           ="nebim-era-plt-deployment-yamls/nebim-era-plt-comm-customer-deployment-yaml/nebim-era-plt-comm-customer-deployment.yaml"
             SERVICE_ACCOUNT_NAME="era-plt-service-account"
-            GITHUB_SECRET       =credentials('CodeBuild/github/token')
+            // GITHUB_SECRET       =credentials('CodeBuild/github/token')
         }
 
         stages {
@@ -39,16 +39,34 @@ pipeline {
                 }
             }
 
-            stage('Docker Build') {
-                steps {
+            // stage('Docker Build') {
+            //     steps {
+            //         script {
+            //             withCredentials([string(credentialsId: 'Github_Token', variable: 'GITHUB_SECRET_JSON')]) {
+            //                 def secretMap = readJSON text: GITHUB_SECRET_JSON
+            //                 sh "docker build --build-arg GITHUB_USERNAME=${secretMap.USERNAME} --build-arg GITHUB_ACCESS_TOKEN=${secretMap.TOKEN} --build-arg GITHUB_PACKAGE_URL=${secretMap.URL} -t ${REPOSITORY_URI}:${VERSION} ."
+            //             }
+            //         }
+            //     }
+            // }
+            stage('Building image') {
+                steps{
                     script {
                         withCredentials([string(credentialsId: 'Github_Token', variable: 'GITHUB_SECRET_JSON')]) {
                             def secretMap = readJSON text: GITHUB_SECRET_JSON
-                            sh "docker build --build-arg GITHUB_USERNAME=${secretMap.USERNAME} --build-arg GITHUB_ACCESS_TOKEN=${secretMap.TOKEN} --build-arg GITHUB_PACKAGE_URL=${secretMap.URL} -t ${REPOSITORY_URI}:${VERSION} ."
+
+                            maskPasswords([
+                                [var: 'GITHUB_USERNAME', password: secretMap.USERNAME],
+                                [var: 'GITHUB_ACCESS_TOKEN', password: secretMap.TOKEN],
+                                [var: 'GITHUB_PACKAGE_URL', password: secretMap.URL]
+                            ]) {
+                                sh "docker build --build-arg GITHUB_USERNAME=$GITHUB_USERNAME --build-arg GITHUB_ACCESS_TOKEN=$GITHUB_ACCESS_TOKEN --build-arg GITHUB_PACKAGE_URL=$GITHUB_PACKAGE_URL -t ${REPOSITORY_URI}:${VERSION} ."
+                            }
                         }
                     }
                 }
             }
+
 
 
             // Logging into AWS ECR
