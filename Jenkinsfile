@@ -12,22 +12,11 @@ pipeline {
         }
 
         stages {
-            // // Setup Github Environment Variables
-            // stage('Setup Github Environment Variables') {
-            //     steps {
-            //         script {
-            //             def secretMap = readJSON text: GITHUB_SECRET
-            //             env.GITHUB_USERNAME     = secretMap.USERNAME
-            //             env.GITHUB_PACKAGE_URL  = secretMap.URL
-            //         }
-            //     }
-            // }
-
-
             stage('Getting Version') {
                 steps {
                     script {
                         sh '''
+                        env
                         export PATH="$PATH:/var/lib/jenkins/.dotnet/tools"
                         GitVersion=$(dotnet-gitversion)
                         VERSION=$(echo $GitVersion | jq -r .NuGetVersionV2)
@@ -49,46 +38,15 @@ pipeline {
                     }
                 }
             }
-            // stage('Building image') {
-            //     steps {
-            //         script {
-            //             withCredentials([string(credentialsId: 'Github_Token', variable: 'GITHUB_SECRET_JSON')]) {
-            //                 def secretMap = readJSON text: GITHUB_SECRET_JSON
-            //                 sh """
-            //                     chmod +x docker_build.sh
-            //                     ./docker_build.sh "${secretMap.USERNAME}" "${secretMap.TOKEN}" "${secretMap.URL}" "${REPOSITORY_URI}" "${VERSION}"
-            //                 """.trim()
-            //             }
-            //         }
-            //     }
-            // }
-
 
             // Logging into AWS ECR
             stage('Logging into AWS ECR') {
                 steps {
                     script {
-                        sh "env"
                         sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
                     }       
                 }
             }
-
-            // Cloning Git repository
-            stage('Cloning Git') {
-                steps {
-                    checkout scmGit(branches: [[name: '*/main']], extensions: [[$class: 'WipeWorkspace']], userRemoteConfigs: [[credentialsId: 'GithubConnection', url: 'https://github.com/CihatDinc/jenkins.git']])
-                }
-            }
-       
-            // // Building Docker images
-            // stage('Building image') {
-            //     steps{
-            //         script {
-            //             sh "docker build --build-arg GITHUB_USERNAME=${GITHUB_USERNAME} --build-arg GITHUB_ACCESS_TOKEN=${GITHUB_SECRET} --build-arg GITHUB_PACKAGE_URL=${GITHUB_PACKAGE_URL} -t ${REPOSITORY_URI}:${VERSION} ."
-            //         }
-            //     }    
-            // }
        
             // Uploading Docker images into AWS ECR
             stage('Pushing to ECR') {
