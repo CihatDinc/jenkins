@@ -7,7 +7,7 @@ pipeline {
             REPOSITORY_URI      = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
             S3_BUCKET           ="nebim-era-plt-deployment-yamls/nebim-era-plt-comm-customer-deployment-yaml/nebim-era-plt-comm-customer-deployment.yaml"
             SERVICE_ACCOUNT_NAME="era-plt-service-account"
-            GITHUB_SECRET       =credentials('Github_Token_V1')
+            GITHUB_SECRET       =credentials('newrelic-api-key3')
             GITHUB_USERNAME     ="nebim-github-user"
             GITHUB_PACKAGE_URL  ="https://nuget.pkg.github.com/nebim-era/index.json"
         }
