@@ -28,9 +28,7 @@ pipeline {
                     script {
                         withCredentials([string(credentialsId: 'Github_Token', variable: 'GITHUB_SECRET_JSON')]) {
                             def secretMap = readJSON text: GITHUB_SECRET_JSON
-                            env.GITHUB_USERNAME     = secretMap.USERNAME
-                            env.GITHUB_ACCESS_TOKEN = secretMap.TOKEN
-                            env.GITHUB_PACKAGE_URL  = secretMap.URL
+                            sh "docker build --build-arg GITHUB_USERNAME=${secretMap.USERNAME} --build-arg GITHUB_ACCESS_TOKEN=${secretMap.TOKEN} --build-arg GITHUB_PACKAGE_URL=${secretMap.URL} -t ${REPOSITORY_URI}:${VERSION} ."
                         }
                     }
                 }
@@ -71,13 +69,13 @@ pipeline {
             }
        
             // Building Docker images
-            stage('Building image') {
-                steps{
-                    script {
-                        sh "docker build --build-arg GITHUB_USERNAME --build-arg GITHUB_ACCESS_TOKEN --build-arg GITHUB_PACKAGE_URL -t ${REPOSITORY_URI}:${VERSION} ."
-                    }
-                }    
-            }
+            // stage('Building image') {
+            //     steps{
+            //         script {
+            //             sh "docker build --build-arg GITHUB_USERNAME --build-arg GITHUB_ACCESS_TOKEN --build-arg GITHUB_PACKAGE_URL -t ${REPOSITORY_URI}:${VERSION} ."
+            //         }
+            //     }    
+            // }
        
             // Uploading Docker images into AWS ECR
             stage('Pushing to ECR') {
