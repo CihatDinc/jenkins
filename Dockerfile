@@ -25,9 +25,16 @@ WORKDIR /src
 COPY . .
 
 
-COPY add_nuget_source.sh /src/
-RUN chmod +x /src/add_nuget_source.sh
-RUN /src/add_nuget_source.sh
+# COPY add_nuget_source.sh /src/
+# RUN chmod +x /src/add_nuget_source.sh
+# RUN /src/add_nuget_source.sh
+
+RUN dotnet nuget add source \
+    --username $GITHUB_USERNAME \
+    --password $GITHUB_ACCESS_TOKEN \
+    --store-password-in-clear-text \
+    --name github $GITHUB_PACKAGE_URL
+
 
 
 RUN dotnet restore "src/Service/Service.csproj"
