@@ -87,7 +87,7 @@ pipeline {
             stage('Building image') {
                 steps{
                     script {
-                        sh "docker build --build-arg GITHUB_USERNAME --build-arg GITHUB_SECRET --build-arg GITHUB_PACKAGE_URL -t ${REPOSITORY_URI}:${VERSION} ."
+                        sh "docker build --build-arg GITHUB_USERNAME=${GITHUB_USERNAME} --build-arg GITHUB_ACCESS_TOKEN=${GITHUB_SECRET} --build-arg GITHUB_PACKAGE_URL=${GITHUB_PACKAGE_URL} -t ${REPOSITORY_URI}:${VERSION} ."
                     }
                 }    
             }
