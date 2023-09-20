@@ -52,25 +52,15 @@ pipeline {
             stage('Building image') {
                 steps {
                     script {
-                        // MaskPasswords eklentisini kullanarak değerleri maskeliyoruz.
                         withCredentials([string(credentialsId: 'Github_Token', variable: 'GITHUB_SECRET_JSON')]) {
                             def secretMap = readJSON text: GITHUB_SECRET_JSON
-                            
-                            // Şimdi, bir Scripted Pipeline bloğuna geçiş yapıyoruz.
-                            node {
-                                maskPasswords([
-                                    [var: 'GITHUB_USERNAME', password: secretMap.USERNAME],
-                                    [var: 'GITHUB_ACCESS_TOKEN', password: secretMap.TOKEN],
-                                    [var: 'GITHUB_PACKAGE_URL', password: secretMap.URL]
-                                ]) {
-                                    sh "docker build --build-arg GITHUB_USERNAME=$GITHUB_USERNAME --build-arg GITHUB_ACCESS_TOKEN=$GITHUB_ACCESS_TOKEN --build-arg GITHUB_PACKAGE_URL=$GITHUB_PACKAGE_URL -t ${REPOSITORY_URI}:${VERSION} ."
-                                }
-                            }
+                            sh '''
+                                ./docker_build.sh "${GITHUB_USERNAME}" "${GITHUB_ACCESS_TOKEN}" "${GITHUB_PACKAGE_URL}" "${REPOSITORY_URI}" "${VERSION}"
+                            '''.trim()
                         }
                     }
                 }
             }
-
 
 
             // Logging into AWS ECR
