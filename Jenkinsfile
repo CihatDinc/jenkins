@@ -23,7 +23,23 @@ pipeline {
             //     }
             // }
 
-            stage('Setup Github Environment Variables') {
+
+            stage('Getting Version') {
+                steps {
+                    script {
+                        sh '''
+                        export PATH="$PATH:/var/lib/jenkins/.dotnet/tools"
+                        GitVersion=$(dotnet-gitversion)
+                        VERSION=$(echo $GitVersion | jq -r .NuGetVersionV2)
+                        echo "VERSION=$VERSION" > version.properties
+                        '''
+                        def props = readProperties file: 'version.properties'
+                        env.VERSION = props.VERSION
+                    }
+                }
+            }
+
+            stage('Docker Build') {
                 steps {
                     script {
                         withCredentials([string(credentialsId: 'Github_Token', variable: 'GITHUB_SECRET_JSON')]) {
@@ -33,7 +49,6 @@ pipeline {
                     }
                 }
             }
-
 
 
             // Logging into AWS ECR
@@ -50,21 +65,6 @@ pipeline {
             stage('Cloning Git') {
                 steps {
                     checkout scmGit(branches: [[name: '*/main']], extensions: [[$class: 'WipeWorkspace']], userRemoteConfigs: [[credentialsId: 'GithubConnection', url: 'https://github.com/CihatDinc/jenkins.git']])
-                }
-            }
-
-            stage('Getting Version') {
-                steps {
-                    script {
-                        sh '''
-                        export PATH="$PATH:/var/lib/jenkins/.dotnet/tools"
-                        GitVersion=$(dotnet-gitversion)
-                        VERSION=$(echo $GitVersion | jq -r .NuGetVersionV2)
-                        echo "VERSION=$VERSION" > version.properties
-                        '''
-                        def props = readProperties file: 'version.properties'
-                        env.VERSION = props.VERSION
-                    }
                 }
             }
        
