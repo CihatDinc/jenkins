@@ -11,18 +11,32 @@ pipeline {
         }
 
         stages {
+            // // Setup Github Environment Variables
+            // stage('Setup Github Environment Variables') {
+            //     steps {
+            //         script {
+            //             def secretMap = readJSON text: GITHUB_SECRET
+            //             env.GITHUB_USERNAME     = secretMap.USERNAME
+            //             env.GITHUB_ACCESS_TOKEN = secretMap.TOKEN
+            //             env.GITHUB_PACKAGE_URL  = secretMap.URL
+            //         }
+            //     }
+            // }
 
-            // Setup Github Environment Variables
             stage('Setup Github Environment Variables') {
                 steps {
                     script {
-                        def secretMap = readJSON text: GITHUB_SECRET
-                        env.GITHUB_USERNAME     = secretMap.USERNAME
-                        env.GITHUB_ACCESS_TOKEN = secretMap.TOKEN
-                        env.GITHUB_PACKAGE_URL  = secretMap.URL
+                        withCredentials([string(credentialsId: 'Github_Token', variable: 'GITHUB_SECRET_JSON')]) {
+                            def secretMap = readJSON text: GITHUB_SECRET_JSON
+                            env.GITHUB_USERNAME     = secretMap.USERNAME
+                            env.GITHUB_ACCESS_TOKEN = secretMap.TOKEN
+                            env.GITHUB_PACKAGE_URL  = secretMap.URL
+                        }
                     }
                 }
             }
+
+
 
             // Logging into AWS ECR
             stage('Logging into AWS ECR') {
