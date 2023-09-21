@@ -1,7 +1,7 @@
 pipeline {
     agent {
         dockerContainer {
-            image 'docker pull docker:dind'
+            image 'docker:dind'
         }
     }
 
