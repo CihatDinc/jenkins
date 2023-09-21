@@ -1,8 +1,7 @@
 pipeline {
     agent {
-        docker {
-            image '212845026981.dkr.ecr.eu-central-1.amazonaws.com/dotnet-sdk:7.0.203-gitVersion-dind-2'
-            args '-u 0'
+        dockerContainer {
+            image 'docker pull docker:dind'
         }
     }
 
@@ -19,6 +18,18 @@ pipeline {
 
         stages {
 
+            stage ('Test'){
+                steps {
+                    sh '''
+                    apt-get update -y
+                    apt-get install sudo -y
+                    apt-get install -y dotnet-sdk-7.0
+                    dotnet tool install --global GitVersion.Tool --version 5.*
+                    PATH="/app/.dotnet/tools:${PATH}"
+                    '''
+                }
+            }
+
             stage('Login to AWS ECR'){
                 steps {
                     script {
@@ -32,7 +43,6 @@ pipeline {
                 steps {
                     script {
                         sh '''
-                        startup.sh sh
                         apt-update -y
                         apt install sudo -y
                         sudo apt install zip
