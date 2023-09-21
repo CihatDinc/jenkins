@@ -1,7 +1,8 @@
 pipeline {
     agent {
-        dockerContainer {
+        docker {
             image '212845026981.dkr.ecr.eu-central-1.amazonaws.com/dotnet-sdk:7.0.203-gitVersion-dind-2'
+            args '-u 0'
         }
     }
 
