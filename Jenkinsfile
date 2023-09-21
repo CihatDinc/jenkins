@@ -75,7 +75,7 @@ pipeline {
                     // sh "kubectl apply -f nebim-era-plt-comm-customer-deployment.yaml"
                     sh "kubectl describe deployments plt-comm-customer-deployment -n plt"
                     sh "docker images"
-                    sh "docker image prune ${REPOSITORY_URI}:${VERSIONTAG}"
+                    sh "docker image rm ${REPOSITORY_URI}:${VERSIONTAG}"
                     sh "docker images"
                 }
             }            
