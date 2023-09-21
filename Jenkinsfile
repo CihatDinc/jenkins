@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent none 
         environment {
             AWS_ACCOUNT_ID      ="212845026981"
             AWS_DEFAULT_REGION  ="eu-central-1" 
@@ -12,7 +12,22 @@ pipeline {
         }
 
         stages {
-            stage('Getting Version') {
+
+            stage('Login to AWS ECR')
+                steps {
+                    script {
+                       // AWS ECR ile kimlik doğrulama
+                       sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+                   }
+                }
+            
+            stage('Build and Run Docker container')
+                agent {
+                    docker {
+                        image "212845026981.dkr.ecr.eu-central-1.amazonaws.com/dotnet-sdk:7.0.203-gitVersion-dind-2"
+                        args "-u root:root"
+                    }
+                }
                 steps {
                     script {
                         sh '''
@@ -26,8 +41,53 @@ pipeline {
                         env.VERSION = props.VERSION
                         env.VERSIONTAG = "0.0.${BUILD_NUMBER}-${GIT_PREVIOUS_COMMIT}-${VERSION}"
                     }
+
+            stage('Install')
+                steps {
+                    script {
+                        sh '''
+                        startup.sh sh
+                        apt-update -y
+                        apt install sudo -y
+                        sudo apt install zip
+                        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                        unzip awscliv2.zip
+                        sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update
+                        aws --version
+                        apt install jq -y
+                        wget https://get.helm.sh/helm-v3.7.2-linux-amd64.tar.gz -O helm.tar.gz; tar -xzf helm.tar.gz
+                        chmod +x ./linux-amd64/helm
+                        mv ./linux-amd64/helm /usr/local/bin/helm
+                        curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.18.9/2020-11-02/bin/linux/amd64/kubectl   
+                        chmod +x ./kubectl
+                        mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
+                        echo 'export PATH=$PATH:$HOME/bin' >> ~/.bashrc
+                        curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.10.3/2018-07-26/bin/linux/amd64/aws-iam-authenticator
+                        chmod +x ./aws-iam-authenticator
+                        cp ./aws-iam-authenticator $HOME/bin/aws-iam-authenticator && export PATH=$HOME/bin:$PATH
+                        echo 'aws-iam-authenticator installed'  
+                        echo 'Check kubectl version'
+                        kubectl version --short --client
+                        '''
+                    }
                 }
-            }
+
+            // stage('Getting Version') {
+            //     steps {
+            //         script {
+            //             sh '''
+            //             env
+            //             export PATH="$PATH:/var/lib/jenkins/.dotnet/tools"
+            //             GitVersion=$(dotnet-gitversion)
+            //             VERSION=$(echo $GitVersion | jq -r .NuGetVersionV2)
+            //             echo "VERSION=$VERSION" > version.properties
+            //             '''
+            //             def props = readProperties file: 'version.properties'
+            //             env.VERSION = props.VERSION
+            //             env.VERSIONTAG = "0.0.${BUILD_NUMBER}-${GIT_PREVIOUS_COMMIT}-${VERSION}"
+            //         }
+            //     }
+            // }
 
             stage('Docker Build') {
                 steps {
