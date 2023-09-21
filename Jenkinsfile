@@ -1,5 +1,10 @@
 pipeline {
-    agent none
+    agent {
+        dockerContainer {
+            image '212845026981.dkr.ecr.eu-central-1.amazonaws.com/dotnet-sdk:7.0.203-gitVersion-dind-2'
+        }
+    }
+
         environment {
             AWS_ACCOUNT_ID      ="212845026981"
             AWS_DEFAULT_REGION  ="eu-central-1" 
@@ -19,28 +24,6 @@ pipeline {
                        // AWS ECR ile kimlik doğrulama
                        sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
                    }
-                }
-            }
-            
-            stage('Build and Run Docker container'){
-                agent {
-                    dockerContainer {
-                        image "212845026981.dkr.ecr.eu-central-1.amazonaws.com/dotnet-sdk:7.0.203-gitVersion-dind-2"
-                    }
-                }
-                steps {
-                    script {
-                        sh '''
-                        env
-                        export PATH="$PATH:/var/lib/jenkins/.dotnet/tools"
-                        GitVersion=$(dotnet-gitversion)
-                        VERSION=$(echo $GitVersion | jq -r .NuGetVersionV2)
-                        echo "VERSION=$VERSION" > version.properties
-                        '''
-                        def props = readProperties file: 'version.properties'
-                        env.VERSION = props.VERSION
-                        env.VERSIONTAG = "0.0.${BUILD_NUMBER}-${GIT_PREVIOUS_COMMIT}-${VERSION}"
-                    }
                 }
             }
 
@@ -75,22 +58,22 @@ pipeline {
                 }
             }
 
-            // stage('Getting Version') {
-            //     steps {
-            //         script {
-            //             sh '''
-            //             env
-            //             export PATH="$PATH:/var/lib/jenkins/.dotnet/tools"
-            //             GitVersion=$(dotnet-gitversion)
-            //             VERSION=$(echo $GitVersion | jq -r .NuGetVersionV2)
-            //             echo "VERSION=$VERSION" > version.properties
-            //             '''
-            //             def props = readProperties file: 'version.properties'
-            //             env.VERSION = props.VERSION
-            //             env.VERSIONTAG = "0.0.${BUILD_NUMBER}-${GIT_PREVIOUS_COMMIT}-${VERSION}"
-            //         }
-            //     }
-            // }
+            stage('Getting Version') {
+                steps {
+                    script {
+                        sh '''
+                        env
+                        export PATH="$PATH:/var/lib/jenkins/.dotnet/tools"
+                        GitVersion=$(dotnet-gitversion)
+                        VERSION=$(echo $GitVersion | jq -r .NuGetVersionV2)
+                        echo "VERSION=$VERSION" > version.properties
+                        '''
+                        def props = readProperties file: 'version.properties'
+                        env.VERSION = props.VERSION
+                        env.VERSIONTAG = "0.0.${BUILD_NUMBER}-${GIT_PREVIOUS_COMMIT}-${VERSION}"
+                    }
+                }
+            }
 
             stage('Docker Build') {
                 steps {
