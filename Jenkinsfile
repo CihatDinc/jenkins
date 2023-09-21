@@ -65,6 +65,7 @@ pipeline {
                     sh "cat nebim-era-plt-comm-customer-deployment.yaml"
                     sh "sed -i 's|CONTAINER_IMAGE|${REPOSITORY_URI}:${VERSIONTAG}|g' nebim-era-plt-comm-customer-deployment.yaml"
                     sh "sed -i 's|SERVICE_ACCOUNT_NAME|${SERVICE_ACCOUNT_NAME}|g' nebim-era-plt-comm-customer-deployment.yaml"
+                    sh "sed -i 's|SERVICE_GIT_VERSION|${VERSION}|g' nebim-era-plt-comm-customer-deployment.yaml"
                     sh "cat nebim-era-plt-comm-customer-deployment.yaml"
                 }
             }
