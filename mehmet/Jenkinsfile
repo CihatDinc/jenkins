@@ -8,11 +8,12 @@ pipeline{
         steps{
           script{
             env.GIT_COMMIT_MSG = sh (script: 'git log -1 --pretty=%B ${GIT_COMMIT}', returnStdout: true).trim()
-            if (env.GIT_COMMIT_MSG.contains("merge")== true) {
-              autoCancelled = true
-              error('Aborting the build.')
-              }
-            else { echo "checkout passed"}
+            echo GIT_COMMIT_MSG
+            //if (env.GIT_COMMIT_MSG.contains("merge")== true) {
+            //  autoCancelled = true
+            //  error('Aborting the build.')
+            //  }
+            //else { echo "checkout passed"}
             }
         }
       }
