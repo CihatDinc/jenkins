@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'docker:dind'
+            args '-v /var/run/docker.sock:/var/run/docker.sock -u root'
+        }
+    }
         environment {
             AWS_ACCOUNT_ID      ="212845026981"
             AWS_DEFAULT_REGION  ="eu-central-1" 
