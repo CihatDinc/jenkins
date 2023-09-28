@@ -28,10 +28,9 @@ pipeline {
                         sh '''
                         env
                         apk update
-                        apk add --no-cache curl ca-certificates &&
-                        curl -L -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.8.0/bin/linux/amd64/kubectl &&
+                        apk add --no-cache curl ca-certificates
+                        curl -L -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.8.0/bin/linux/amd64/kubectl
                         chmod +x /usr/bin/kubectl
-                        curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
                         apk add jq
                         apk add --no-cache aws-cli
                         apk add dotnet7-sdk
