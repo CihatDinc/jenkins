@@ -17,6 +17,8 @@ pipeline {
             SERVICE_ACCOUNT_NAME="era-plt-service-account"
             GITHUB_SECRET       =credentials('CodeBuild/github/token')
             GITHUB_ACCESS_TOKEN =credentials('Github_Token')
+            AWS_ACCESS_TOKEN =credentials('AWS_ACCESS_TOKEN')
+            AWS_SECRET_TOKEN =credentials('AWS_SECRET_TOKEN')
         }
 
         stages {
@@ -59,6 +61,8 @@ pipeline {
             stage('Logging into AWS ECR') {
                 steps {
                     script {
+                        sh "aws --profile default configure set aws_access_key_id "${AWS_ACCESS_TOKEN}" "
+                        sh "aws --profile default configure set aws_secret_access_key "${AWS_SECRET_TOKEN}" "
                         sh "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
                     }       
                 }
