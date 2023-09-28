@@ -1,1 +1,1 @@
-nebim.era.plt.comm.custome
+nebim.era.plt.comm.customer
