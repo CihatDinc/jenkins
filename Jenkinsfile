@@ -98,6 +98,13 @@ pipeline {
             stage('K8S Deploy') {
                 steps {
                     // sh "kubectl apply -f nebim-era-plt-comm-customer-deployment.yaml"
+                    sh '''
+                        curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+                        mv /tmp/eksctl /usr/local/bin
+                        eksctl version
+                        
+                    '''
+                    sh "aws eks --region eu-central-1 update-kubeconfig --name era-eks-dev3"
                     sh "kubectl describe deployments plt-comm-customer-deployment -n plt"
                     sh "docker images"
                     sh "docker image rm ${REPOSITORY_URI}:${VERSIONTAG}"
