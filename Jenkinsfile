@@ -22,6 +22,7 @@ pipeline {
                     script {
                         sh '''
                         env
+                        apk add jq
                         apk add dotnet7-sdk
                         apk add aspnetcore7-runtime
                         apk add dotnet7-runtime
