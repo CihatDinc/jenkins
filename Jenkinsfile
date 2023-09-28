@@ -26,8 +26,8 @@ pipeline {
                         apk add aspnetcore7-runtime
                         apk add dotnet7-runtime
                         dotnet tool install --global GitVersion.Tool --version 5.*
-                        dotnet-gitversion -version
                         export PATH="$PATH:/root/.dotnet/tools"
+                        dotnet-gitversion -version
                         //export PATH="$PATH:/var/lib/jenkins/.dotnet/tools"
                         GitVersion=$(dotnet-gitversion)
                         VERSION=$(echo $GitVersion | jq -r .NuGetVersionV2)
