@@ -29,8 +29,6 @@ pipeline {
                         env
                         apk update
                         apk add --no-cache curl ca-certificates
-                        curl -L -o /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.8.0/bin/linux/amd64/kubectl
-                        chmod +x /usr/bin/kubectl
                         apk add jq
                         apk add --no-cache aws-cli
                         apk add dotnet7-sdk
@@ -101,7 +99,9 @@ pipeline {
                         curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
                         mv /tmp/eksctl /usr/local/bin
                         eksctl version
-                        
+                        curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+                        chmod +x ./kubectl
+                        mv ./kubectl /usr/bin/kubectl
                     '''
                     sh "aws eks --region eu-central-1 update-kubeconfig --name era-eks-dev3"
                     sh "kubectl describe deployments plt-comm-customer-deployment -n plt"
