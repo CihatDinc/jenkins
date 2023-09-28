@@ -23,6 +23,7 @@ pipeline {
                         sh '''
                         env
                         apk add jq
+                        apk add --no-cache aws-cli
                         apk add dotnet7-sdk
                         apk add aspnetcore7-runtime
                         apk add dotnet7-runtime
