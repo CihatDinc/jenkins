@@ -6,7 +6,8 @@ pipeline {
         }
     }
     triggers {
-    githubPush()
+        githubPush()
+        githubPullRequests(event.Open(abortRunning : true ))
   }
         environment {
             AWS_ACCOUNT_ID      ="212845026981"
