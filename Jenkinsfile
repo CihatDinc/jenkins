@@ -6,7 +6,6 @@ pipeline {
         }
     }
     triggers {
-        githubPush()
         githubPullRequests(event.Open(abortRunning : true ))
   }
         environment {
